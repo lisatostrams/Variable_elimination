@@ -45,8 +45,20 @@ public class Main {
 		//PUT YOUR CODE FOR THE VARIABLE ELIMINATION ALGORITHM HERE
                 
                 //c) 1) product forumula to compute the query
-                
                 //   2) reduced formula based on network structure
+                String formula = ""; 
+                for (int i = 0; i < Ps.size(); i++) {
+                    if (Vs.get(i).getNrOfParents() != 0) {
+                        formula += ("P(" + Vs.get(i).getName() + "|");
+                            for (int j = 0; j < Vs.get(i).getParents().size(); j++) {		
+                                formula += (Vs.get(i).getParents().get(j).getName() + ",");
+                            }
+                            formula += ")"; 
+                    } else {
+			formula += ("P(" + Vs.get(i).getName() + ")"); 
+                    }
+                }
+                System.out.println(formula);
                 
                 log.log_c();
                 
