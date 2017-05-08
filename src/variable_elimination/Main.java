@@ -16,6 +16,7 @@ public class Main {
 		
 		// Read in the network
 		Networkreader reader = new Networkreader(networkName); 
+                Log log = new Log(networkName); 
 		
 		// Get the variables and probabilities of the network
 		ArrayList<Variable> Vs = reader.getVs(); 
@@ -29,14 +30,45 @@ public class Main {
 		reader.askForHeuristic();
 		Variable Q = reader.getQueriedVariable(); 
 		
-		// Ask user for observed variables 
+                log.log_a(Q);
+		
+                // Ask user for observed variables 
 		reader.askForObservedVariables(); 
 		ArrayList<Variable> O = reader.getObservedVariables(); 
 		
-		// Print the query and observed variables
+                log.log_b(O);
+		
+                // Print the query and observed variables
 		reader.printQueryAndObserved(Q, O); 
 		
 		
 		//PUT YOUR CODE FOR THE VARIABLE ELIMINATION ALGORITHM HERE
+                
+                //c) 1) product forumula to compute the query
+                
+                //   2) reduced formula based on network structure
+                
+                log.log_c();
+                
+                //d) identify factors and reduce observed variables
+                
+                log.log_d(); 
+                
+                //e) fix elimination order: start with leaf variables, then roots, then remaining nodes
+                
+                log.log_e(null);
+                
+                //f) for every variable Z in ordering:
+                //  1) multiply factors containing Z
+                //  2) sum out Z to obtain new factor f_z
+                //  3) remove multiplied factors from list and add f_z
+                
+                log.log_f(null, null);
+                
+                //g) normalize result
+                
+                log.log_g(); 
 	}
+        
+        
 }
