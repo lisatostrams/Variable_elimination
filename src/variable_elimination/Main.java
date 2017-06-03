@@ -16,18 +16,18 @@ public class Main {
 		
 		// Read in the network
 		Networkreader reader = new Networkreader(networkName); 
-                Log log = new Log(networkName); 
+                
 		
 		// Get the variables and probabilities of the network
 		ArrayList<Variable> Vs = reader.getVs(); 
 		ArrayList<ArrayList<ProbRow>> Ps = reader.getPs(); 
 		
 		// Print variables and probabilities
-		reader.printNetwork(Vs, Ps);
-
+		String log_network = reader.printNetwork(Vs, Ps);
+                Log log = new Log(networkName, log_network); 
 		// Ask user for query and heuristic
 		reader.askForQuery(); 
-		reader.askForHeuristic();
+		//reader.askForHeuristic();
 		Variable Q = reader.getQueriedVariable(); 
 		
                 log.log_a(Q);
@@ -46,40 +46,35 @@ public class Main {
                 
                 //c) 1) product forumula to compute the query
                 //   2) reduced formula based on network structure
-                String formula = ""; 
-                for (int i = 0; i < Ps.size(); i++) {
-                    if (Vs.get(i).getNrOfParents() != 0) {
-                        formula += ("P(" + Vs.get(i).getName() + "|");
-                            for (int j = 0; j < Vs.get(i).getParents().size(); j++) {		
-                                formula += (Vs.get(i).getParents().get(j).getName() + ",");
-                            }
-                            formula += ")"; 
-                    } else {
-			formula += ("P(" + Vs.get(i).getName() + ")"); 
-                    }
-                }
-                System.out.println(formula);
+                Formula form = new Formula(Vs, Q, O, Ps);
                 
-                log.log_c();
+                log.log_c(form.toString(), form.product_toString());
                 
                 //d) identify factors and reduce observed variables
+                form.factorize();
                 
-                log.log_d(); 
+                log.log_d(form.factor_probs()); 
                 
                 //e) fix elimination order: start with leaf variables, then roots, then remaining nodes
-                
-                log.log_e(null);
+                ArrayList<Variable> elimination = form.EliminationOrder();
+                log.log_e(form.elimination_toString());
                 
                 //f) for every variable Z in ordering:
                 //  1) multiply factors containing Z
                 //  2) sum out Z to obtain new factor f_z
                 //  3) remove multiplied factors from list and add f_z
-                
-                log.log_f(null, null);
+                String log_f = "";
+                for(Variable Z : elimination) {
+                    log_f += form.eliminate_Z(Z);
+                    System.out.println();
+                }
+                System.out.println(log_f);
+                log.log_f(log_f);
                 
                 //g) normalize result
-                
-                log.log_g(); 
+                String log_g = form.normalize();
+                System.out.println(log_g);
+                log.log_g(log_g); 
 	}
         
         

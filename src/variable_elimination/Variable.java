@@ -49,7 +49,11 @@ public class Variable {
 	public String getName() {
 		return name;
 	}
-
+        
+        public String toString() {
+		return name;
+	}
+        
 	/** 
 	 * Setter of the value.
 	 * @param value to which the value of the variable should be set.

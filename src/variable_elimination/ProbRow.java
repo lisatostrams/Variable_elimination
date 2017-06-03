@@ -23,6 +23,7 @@ public class ProbRow {
 		this.probs = probs;
 		this.parentsValues = parentsValues;
 		this.node = node;
+                
 		this.parents = parents;
 	}
 
@@ -35,6 +36,17 @@ public class ProbRow {
 		return this.parentsValues.equals(pr.parentsValues);
 	}
 
+        public boolean possibleToSumOut(ProbRow pr, int i) {
+            if(parentsValues[i] == pr.parentsValues[i]) return false; 
+    
+            for(int j = 0; j < parentsValues.length; j++) {
+                if(j != i && !parentsValues[j].equals(pr.parentsValues[j])) {
+              
+                    return false;
+                }
+            }
+            return true;
+        }
 	/**
 	 * Getter of the probabilities.
 	 * @return the probabilities of the node.

@@ -1,0 +1,32 @@
+Logfile for network earthquake.bif
+The variables:
+1) Burglary - True, False
+2) Earthquake - True, False
+3) Alarm - True, False
+4) JohnCalls - True, False
+5) MaryCalls - True, False
+
+The probabilities:
+Burglary has no parents.
+ | 0.01, 0.99
+
+Earthquake has no parents.
+ | 0.02, 0.98
+
+Alarm has parent Burglary
+Alarm has parent Earthquake
+True, True | 0.95, 0.05
+False, True | 0.29, 0.71
+True, False | 0.94, 0.06
+False, False | 0.001, 0.999
+
+JohnCalls has parent Alarm
+True | 0.9, 0.1
+False | 0.05, 0.95
+
+MaryCalls has parent Alarm
+True | 0.7, 0.3
+False | 0.01, 0.99
+
+
+Query variable: MaryCalls
