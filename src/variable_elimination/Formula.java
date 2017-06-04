@@ -208,7 +208,8 @@ public class Formula {
         pr.add("p");
         ArrayList<ProbRow> new_prop = new ArrayList();
         Variable fact = new Variable("f_" + factor_idx, pr);
-        ArrayList<Variable> parents = variable.getParents();
+        ArrayList<Variable> parents = new ArrayList();
+        parents.addAll(variable.getParents());
         parents.add(variable);
         int[] obs_p = new int[O.size()];
         int o = 0;
@@ -218,7 +219,6 @@ public class Formula {
         }
         for (ProbRow tablerow : table) {
             boolean row_obs = true;
-
             for (int p = 0; p < tablerow.getParents().size(); p++) { //only add row to factor if observed value equals value in probrow
                 if (tablerow.getParents().get(p).getObserved()) {
                     String obs_val = tablerow.getParents().get(p).getValue();
@@ -324,6 +324,7 @@ public class Formula {
         //  1) multiply factors containing Z
         //  2) sum out Z to obtain new factor f_z
         //  3) remove multiplied factors from list and add f_z
+        
         Factor f_Z = null;
         ArrayList<String> p = new ArrayList();
         p.add("p");
@@ -331,8 +332,10 @@ public class Formula {
         String log = "\n\n";
         for (Factor factor : factorsContaining_Z(Z)) {
             log += (Z.getName() + " is in factor " + factor.getName() + "\n");
+
             if (f_Z == null) {
                 f_Z = factor;
+                f_Z.setFactor(f);
                 Factors.remove(factor);
             } else {  //multiply factors containing Z
 
@@ -344,7 +347,8 @@ public class Formula {
         }
 
         f_Z = f_Z.sumOut(Z);
-        Factors.add(f_Z);
+        if(!f_Z.isEmpty())
+            Factors.add(f_Z);
         log += ("\nMultiply factors and sum out " + Z.getName() + "\nAdded new factor " + f_Z.getName() + "(" + f_Z.getVariables() + ") \n\n");
         log += factor_probs();
         return log;
@@ -359,7 +363,9 @@ public class Formula {
     public ArrayList<Factor> factorsContaining_Z(Variable Z) {
         ArrayList<Factor> factors = new ArrayList();
         for (Factor factor : Factors) {
-            factor.getVariables().contains(Z);
+            if (factor.getVariables().contains(Z)) {
+                factors.add(factor);
+            }
 
         }
         return factors;
@@ -426,7 +432,7 @@ public class Formula {
         factor_prob += "\n\nThe Factors\n";
         for (Factor factor : Factors) {
 
-            factor_prob += factor.toString();
+            factor_prob += (factor.toString() + "\n");
 
         }
         System.out.println(factor_prob);

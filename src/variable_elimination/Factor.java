@@ -27,6 +27,9 @@ public class Factor {
         return factor.getName();
     }
 
+    public void setFactor(Variable f) {
+        factor = f; 
+    }
     public ArrayList<Variable> getVariables() {
         return variables;
     }
@@ -145,6 +148,10 @@ public class Factor {
 
     public ArrayList<ProbRow> getTable() {
         return prob_table;
+    }
+    
+    public boolean isEmpty() {
+        return variables.isEmpty();
     }
 
     @Override

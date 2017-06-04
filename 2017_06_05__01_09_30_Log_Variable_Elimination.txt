@@ -1,0 +1,186 @@
+Logfile for network earthquake.bif
+The variables:
+1) Burglary - True, False
+2) Earthquake - True, False
+3) Alarm - True, False
+4) JohnCalls - True, False
+5) MaryCalls - True, False
+
+The probabilities:
+Burglary has no parents.
+ | 0.01, 0.99
+
+Earthquake has no parents.
+ | 0.02, 0.98
+
+Alarm has parent Burglary
+Alarm has parent Earthquake
+True, True | 0.95, 0.05
+False, True | 0.29, 0.71
+True, False | 0.94, 0.06
+False, False | 0.001, 0.999
+
+JohnCalls has parent Alarm
+True | 0.9, 0.1
+False | 0.05, 0.95
+
+MaryCalls has parent Alarm
+True | 0.7, 0.3
+False | 0.01, 0.99
+
+
+
+
+ -------THE STEPS OF THE VARIABLE ELIMINATION ALGORITHM------- 
+
+Step a) Query variable: 
+	MaryCalls
+
+Step b) Observed variables: 
+	Step c) 1) Product formula: 
+	P(MaryCalls) = P(Burglary)P(Earthquake|Burglary)P(Alarm|Burglary,Earthquake)P(JohnCalls|Burglary,Earthquake,Alarm)P(MaryCalls|Burglary,Earthquake,Alarm,JohnCalls)
+	2) Reduced formula: 
+	P(MaryCalls) = P(Burglary)P(Earthquake)P(Alarm|Burglary,Earthquake)P(JohnCalls|Alarm)P(MaryCalls|Alarm)
+Step d) 
+	Identify factors and reduce observed variables: 
+	p(MaryCalls) = f_0(Burglary) f_1(Earthquake) f_2(Burglary,Earthquake,Alarm) f_3(Alarm,JohnCalls) f_4(Alarm,MaryCalls) 
+
+The Factors
+f_0(Burglary)=
+True | 0.01
+False | 0.99
+f_1(Earthquake)=
+True | 0.02
+False | 0.98
+f_2(Burglary,Earthquake,Alarm)=
+True, True, True | 0.95
+True, True, False | 0.05
+False, True, True | 0.29
+False, True, False | 0.71
+True, False, True | 0.94
+True, False, False | 0.06
+False, False, True | 0.001
+False, False, False | 0.999
+f_3(Alarm,JohnCalls)=
+True, True | 0.9
+True, False | 0.1
+False, True | 0.05
+False, False | 0.95
+f_4(Alarm,MaryCalls)=
+True, True | 0.7
+True, False | 0.3
+False, True | 0.01
+False, False | 0.99
+Step e) Elimination order 
+	Elimination order: 
+JohnCalls > Burglary > Earthquake > Alarm 
+
+Step f) For each variable Z in elimination order: 
+	 1) multiply factors containing Z
+	 2) sum out Z to obtain new factor f_z
+	 3) remove multiplied factors from list and add f_z
+
+
+JohnCalls is in factor f_3
+
+Multiply factors and sum out JohnCalls
+Added new factor f_3([Alarm]) 
+
+p(MaryCalls) = f_0(Burglary) f_1(Earthquake) f_2(Burglary,Earthquake,Alarm) f_4(Alarm,MaryCalls) f_3(Alarm) 
+
+The Factors
+f_0(Burglary)=
+True | 0.01
+False | 0.99
+f_1(Earthquake)=
+True | 0.02
+False | 0.98
+f_2(Burglary,Earthquake,Alarm)=
+True, True, True | 0.95
+True, True, False | 0.05
+False, True, True | 0.29
+False, True, False | 0.71
+True, False, True | 0.94
+True, False, False | 0.06
+False, False, True | 0.001
+False, False, False | 0.999
+f_4(Alarm,MaryCalls)=
+True, True | 0.7
+True, False | 0.3
+False, True | 0.01
+False, False | 0.99
+f_3(Alarm)=
+True | 1.0
+False | 1.0
+
+
+Burglary is in factor f_0
+Burglary is in factor f_2
+
+Multiply factors and sum out Burglary
+Added new factor f_0([Earthquake, Alarm]) 
+
+p(MaryCalls) = f_1(Earthquake) f_4(Alarm,MaryCalls) f_3(Alarm) f_0(Earthquake,Alarm) 
+
+The Factors
+f_1(Earthquake)=
+True | 0.02
+False | 0.98
+f_4(Alarm,MaryCalls)=
+True, True | 0.7
+True, False | 0.3
+False, True | 0.01
+False, False | 0.99
+f_3(Alarm)=
+True | 1.0
+False | 1.0
+f_0(Earthquake,Alarm)=
+True, True | 0.2966
+True, False | 0.7033999999999999
+False, True | 0.01039
+False, False | 0.98961
+
+
+Earthquake is in factor f_1
+Earthquake is in factor f_0
+
+Multiply factors and sum out Earthquake
+Added new factor f_1([Alarm]) 
+
+p(MaryCalls) = f_4(Alarm,MaryCalls) f_3(Alarm) f_1(Alarm) 
+
+The Factors
+f_4(Alarm,MaryCalls)=
+True, True | 0.7
+True, False | 0.3
+False, True | 0.01
+False, False | 0.99
+f_3(Alarm)=
+True | 1.0
+False | 1.0
+f_1(Alarm)=
+True | 0.0161142
+False | 0.9838857999999999
+
+
+Alarm is in factor f_4
+Alarm is in factor f_3
+Alarm is in factor f_1
+
+Multiply factors and sum out Alarm
+Added new factor f_4([MaryCalls]) 
+
+p(MaryCalls) = f_4(MaryCalls) 
+
+The Factors
+f_4(MaryCalls)=
+True | 0.021118797999999998
+False | 0.9788812019999998
+Step g) Normalize result: 
+	
+ After normalization: p(MaryCalls) = f_4(MaryCalls) 
+
+The Factors
+f_4(MaryCalls)=
+True | 0.021118798
+False | 0.978881202
