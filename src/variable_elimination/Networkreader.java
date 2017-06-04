@@ -57,13 +57,13 @@ public class Networkreader {
                         searchForParents(cur);
                     }
                     if (cur.contains("table")) {
-						//Conditional to find probabilities of 1 row and add Probabilities to
+                        //Conditional to find probabilities of 1 row and add Probabilities to
                         // probability list
                         probRows.add(searchForProbs(cur));
                         Ps.add(probRows);
                     }
                     if (cur.contains(")") && cur.contains("(") && !cur.contains("prob")) {
-						// Conditional to find probabilities of more than 1 row;
+                        // Conditional to find probabilities of more than 1 row;
                         // add probabilities to probability list
                         probRows.add(searchForProbs(cur));
                         if (probRows.size() == nrOfRows) {
@@ -209,7 +209,7 @@ public class Networkreader {
         }
 
         Scanner scan = new Scanner(System.in);
-        line = "4";//scan.nextLine();
+        line = scan.nextLine();
         if (line.isEmpty()) {
             System.out.println("You have not chosen a query value. Please choose a query value.");
             askForQuery();
@@ -250,7 +250,7 @@ public class Networkreader {
             System.out.println("Variable " + i + ": " + Vs.get(i).getName() + " - " + values);
         }
         Scanner scan = new Scanner(System.in);
-        line = "1,False";//scan.nextLine();
+        line = scan.nextLine();
         if (line.isEmpty()) {
         } else {
             if (!line.contains(",")) {
@@ -354,8 +354,8 @@ public class Networkreader {
             for (int l = 0; l < probs.size(); l++) {
                 log += (probs.get(l) + "\n");
             }
-            log +=  "\n";
-            
+            log += "\n";
+
         }
         return log;
     }
