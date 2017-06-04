@@ -21,7 +21,7 @@ public class Formula {
     ArrayList<ArrayList<ProbRow>> Ps = new ArrayList();
     String form = "";
     String pform = "";
-    ArrayList<ArrayList<ProbRow>> Factors = new ArrayList();
+    ArrayList<Factor> Factors = new ArrayList();
 
     ArrayList<Variable> Elimination = new ArrayList();
     int fsize = 0;
@@ -191,7 +191,8 @@ public class Formula {
                 new_prop.add(new_p);
             }
         }
-        Factors.add(new_prop);
+        Factor factor = new Factor(fact, parents, new_prop);
+        Factors.add(factor);
     }
 
     /**
@@ -248,7 +249,8 @@ public class Formula {
 
             }
         }
-        Factors.add(new_prop);
+        Factor factor = new Factor(fact, parents, new_prop);
+        Factors.add(factor);
     }
 
     /**
@@ -314,6 +316,7 @@ public class Formula {
 
     /**
      * eliminate the variable Z from the factors
+     *
      * @param Z
      * @return log string
      */
@@ -321,137 +324,56 @@ public class Formula {
         //  1) multiply factors containing Z
         //  2) sum out Z to obtain new factor f_z
         //  3) remove multiplied factors from list and add f_z
-        ArrayList<ProbRow> f_Z = new ArrayList();
+        Factor f_Z = null;
         ArrayList<String> p = new ArrayList();
         p.add("p");
         Variable f = new Variable("f_" + fsize++, p);
         String log = "\n\n";
-        for (ArrayList<ProbRow> factor : factorsContaining_Z(Z)) {
-            log += (Z.getName() + " is in factor " + factor.get(0).getNode().getName() + "\n");
-            if (f_Z.isEmpty()) {
+        for (Factor factor : factorsContaining_Z(Z)) {
+            log += (Z.getName() + " is in factor " + factor.getName() + "\n");
+            if (f_Z == null) {
                 f_Z = factor;
                 Factors.remove(factor);
             } else {  //multiply factors containing Z
 
-                ArrayList<ProbRow> tmp = new ArrayList();
-                ArrayList<Variable> parents = new ArrayList();
-                parents.addAll(f_Z.get(0).getParents());
-                parents.addAll(factor.get(0).getParents());
-                parents.remove(Z);
-                
-                int f_z_idx = f_Z.get(0).getParents().indexOf(Z); //index of Z in one factor
-                int factor_idx = factor.get(0).getParents().indexOf(Z); //index of Z in other factor
-                
-                for (ProbRow f_z_row : f_Z) {
-                    for (ProbRow factor_row : factor) {
-                        if (f_z_row.getPVsAsArrayList().get(f_z_idx).equals(factor_row.getPVsAsArrayList().get(factor_idx))) { //only multiply rows where Z has same value
-                            ArrayList<String> parentsvalues = new ArrayList();
-                            parentsvalues.addAll(f_z_row.getPVsAsArrayList());
-                            parentsvalues.remove(f_z_idx);
-                            parentsvalues.addAll(factor_row.getPVsAsArrayList());
-
-                            String[] pv = new String[parentsvalues.size()];
-                            pv = parentsvalues.toArray(pv);
-                            double[] pr = {f_z_row.getProbs()[0] * factor_row.getProbs()[0]}; //new probablilty
-                            ProbRow new_prob = new ProbRow(f, pr, pv, parents);
-                            tmp.add(new_prob);
-                        }
-                    }
-
-                }
-                f_Z = tmp;
+                f_Z = f_Z.multiply(factor, Z);
                 Factors.remove(factor); //remove multiplied factors from list
 
             }
 
         }
-   
-        int f_z_idx = f_Z.get(0).getParents().indexOf(Z);
-        ArrayList<ProbRow> tmp = new ArrayList();
-        ArrayList<Variable> parents = new ArrayList();
-        parents.addAll(f_Z.get(0).getParents());
-        parents.remove(Z);
 
-        for (ProbRow f_z_row : f_Z) {
-            for (ProbRow f_z_row2 : f_Z) { //sum out Z to obtain new factor
-                if (f_z_row.possibleToSumOut(f_z_row2, f_z_idx)) { //sum rows where possible
-                    
-                    ArrayList<String> parentsvalues = new ArrayList();
-                    parentsvalues.addAll(f_z_row.getPVsAsArrayList());
-                    parentsvalues.remove(f_z_idx);
-                    
-                    double[] pr = {f_z_row.getProbs()[0] + f_z_row2.getProbs()[0]};
-                    String[] pv = new String[parentsvalues.size()];
-                    pv = parentsvalues.toArray(pv);
-                    ProbRow summedout = new ProbRow(f, pr, pv, parents);
-                    
-                    boolean add = true;
-                    for (ProbRow prow : tmp) {
-                        if (prow.getPVsAsArrayList().equals(summedout.getPVsAsArrayList())) {
-                            add = false;
-                        }
-                    }
-                    
-                    if (add) {
-                        tmp.add(summedout);
-                    }
-                }
-            }
-
-        }
-
-        f_Z = tmp;
+        f_Z = f_Z.sumOut(Z);
         Factors.add(f_Z);
-        log += ("\nMultiply factors and sum out " + Z.getName() + "\nAdded new factor " + f.getName() + "(" + f_Z.get(0).getParents() + ") \n\n");
+        log += ("\nMultiply factors and sum out " + Z.getName() + "\nAdded new factor " + f_Z.getName() + "(" + f_Z.getVariables() + ") \n\n");
         log += factor_probs();
         return log;
     }
 
     /**
      * create a list of factors that contain variable Z
+     *
      * @param Z
-     * @return 
+     * @return
      */
-    public ArrayList<ArrayList<ProbRow>> factorsContaining_Z(Variable Z) {
-        ArrayList<ArrayList<ProbRow>> factors = new ArrayList();
-        for (ArrayList<ProbRow> factor : Factors) {
-            if (factor != null) {
-                if (Z.getName().equals(factor.get(0).getNode().getName())) {
-                    factors.add(factor);
-                } else {
-                    for (Variable parent : factor.get(0).getParents()) {
-                        if (Z.getName().equals(parent.getName())) {
-                            factors.add(factor);
-                            break;
-                        }
-                    }
+    public ArrayList<Factor> factorsContaining_Z(Variable Z) {
+        ArrayList<Factor> factors = new ArrayList();
+        for (Factor factor : Factors) {
+            factor.getVariables().contains(Z);
 
-                }
-            }
         }
         return factors;
     }
 
     /**
      * normalize values in factors
-     * @return 
+     *
+     * @return
      */
     public String normalize() {
         double sum = 0;
-        for (ArrayList<ProbRow> factor : Factors) {
-            if (factor != null) {
-                for (ProbRow probability : factor) {
-                    sum += probability.getProbs()[0];
-                }
-            }
-        }
-
-        for (ArrayList<ProbRow> factor : Factors) {
-            if (factor != null) {
-                for (ProbRow probability : factor) {
-                    probability.getProbs()[0] /= sum;
-                }
-            }
+        for (Factor factor : Factors) {
+            factor.normalize();
         }
 
         String log = "\n After normalization: ";
@@ -460,12 +382,10 @@ public class Formula {
 
     }
 
- 
-
- 
     /**
      * string of reduced formula
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {
@@ -474,51 +394,39 @@ public class Formula {
 
     /**
      * string of product formula
-     * @return 
+     *
+     * @return
      */
     public String product_toString() {
         return pform;
     }
 
-
     /**
      * create string of factor probabilities
-     * @return 
+     *
+     * @return
      */
     public String factor_probs() {
 
         String factor_prob = "";
         factor_prob += ("p(" + Query.getName() + ") = ");
-        for (int i = 0; i < Factors.size(); i++) {
-            if (Factors.get(i) != null) {
-                factor_prob += (Factors.get(i).get(0).getNode().getName() + "(");
-                if (Factors.get(i).get(0).getParents().size() != 0) {
-                    for (int j = 0; j < Factors.get(i).get(0).getParents().size(); j++) {
-                        factor_prob += (Factors.get(i).get(0).getParents().get(j).getName() + ",");
-                    }
-                }
-                factor_prob = factor_prob.substring(0, factor_prob.length() - 1);
-                factor_prob += (") ");
+        for (Factor factor : Factors) {
+
+            factor_prob += (factor.getName() + "(");
+
+            for (Variable var : factor.getVariables()) {
+                factor_prob += (var.getName() + ",");
             }
+
+            factor_prob = factor_prob.substring(0, factor_prob.length() - 1);
+            factor_prob += (") ");
+
         }
 
         factor_prob += "\n\nThe Factors\n";
-        for (int i = 0; i < Factors.size(); i++) {
-            if (Factors.get(i) != null) {
-                factor_prob += (Factors.get(i).get(0).getNode().getName() + "(");
-                if (Factors.get(i).get(0).getParents().size() != 0) {
-                    for (int j = 0; j < Factors.get(i).get(0).getParents().size(); j++) {
-                        factor_prob += (Factors.get(i).get(0).getParents().get(j).getName() + ",");
-                    }
-                }
-                factor_prob = factor_prob.substring(0, factor_prob.length() - 1);
-                factor_prob += (") = \n");
-                ArrayList<ProbRow> probs = Factors.get(i);
-                for (int l = 0; l < probs.size(); l++) {
-                    factor_prob += (probs.get(l) + "\n");
-                }
-                factor_prob += "\n";
-            }
+        for (Factor factor : Factors) {
+
+            factor_prob += factor.toString();
 
         }
         System.out.println(factor_prob);
@@ -527,7 +435,8 @@ public class Formula {
 
     /**
      * string of elimination ordering of variables
-     * @return 
+     *
+     * @return
      */
     public String elimination_toString() {
         String el_o = "";
