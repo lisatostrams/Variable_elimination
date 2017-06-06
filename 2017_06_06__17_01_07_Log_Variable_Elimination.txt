@@ -1,0 +1,170 @@
+Logfile for network earthquake.bif
+The variables:
+1) Burglary - True, False
+2) Earthquake - True, False
+3) Alarm - True, False
+4) JohnCalls - True, False
+5) MaryCalls - True, False
+
+The probabilities:
+Burglary has no parents.
+ | 0.01, 0.99
+
+Earthquake has no parents.
+ | 0.02, 0.98
+
+Alarm has parent Burglary
+Alarm has parent Earthquake
+True, True | 0.95, 0.05
+False, True | 0.29, 0.71
+True, False | 0.94, 0.06
+False, False | 0.001, 0.999
+
+JohnCalls has parent Alarm
+True | 0.9, 0.1
+False | 0.05, 0.95
+
+MaryCalls has parent Alarm
+True | 0.7, 0.3
+False | 0.01, 0.99
+
+
+
+
+ -------THE STEPS OF THE VARIABLE ELIMINATION ALGORITHM------- 
+
+Step a) Query variable: 
+	Burglary
+
+Step b) Observed variables: 
+		JohnCalls=True
+Step c) 1) Product formula: 
+	P(Burglary|JohnCalls=True) = P(Burglary)P(Earthquake|Burglary)P(Alarm|Burglary,Earthquake)P(JohnCalls=True|Burglary,Earthquake,Alarm)P(MaryCalls|Burglary,Earthquake,Alarm,JohnCalls=True)
+	2) Reduced formula: 
+	P(Burglary|JohnCalls=True) = P(Burglary)P(Earthquake)P(Alarm|Burglary,Earthquake)P(JohnCalls=True|Alarm)P(MaryCalls|Alarm)
+Step d) 
+	Identify factors and reduce observed variables: 
+	p(Burglary) = f_0(Burglary) f_1(Earthquake) f_2(Burglary,Earthquake,Alarm) f_3(Alarm,MaryCalls) 
+
+The Factors
+f_0(Burglary)=
+True | 0.01
+False | 0.99
+
+f_1(Earthquake)=
+True | 0.02
+False | 0.98
+
+f_2(Burglary,Earthquake,Alarm)=
+True, True, True | 0.95
+True, True, False | 0.05
+False, True, True | 0.29
+False, True, False | 0.71
+True, False, True | 0.94
+True, False, False | 0.06
+False, False, True | 0.001
+False, False, False | 0.999
+
+f_3(Alarm,MaryCalls)=
+True, True | 0.7
+True, False | 0.3
+False, True | 0.01
+False, False | 0.99
+
+Step e) Elimination order 
+	Elimination order: 
+MaryCalls > Earthquake > Alarm 
+
+Step f) For each variable Z in elimination order: 
+	 1) multiply factors containing Z
+	 2) sum out Z to obtain new factor f_z
+	 3) remove multiplied factors from list and add f_z
+
+
+MaryCalls is in factor f_3
+
+Multiply factors and sum out MaryCalls
+Added new factor f_4([Alarm]) 
+
+p(Burglary) = f_0(Burglary) f_1(Earthquake) f_2(Burglary,Earthquake,Alarm) f_4(Alarm) 
+
+The Factors
+f_0(Burglary)=
+True | 0.01
+False | 0.99
+
+f_1(Earthquake)=
+True | 0.02
+False | 0.98
+
+f_2(Burglary,Earthquake,Alarm)=
+True, True, True | 0.95
+True, True, False | 0.05
+False, True, True | 0.29
+False, True, False | 0.71
+True, False, True | 0.94
+True, False, False | 0.06
+False, False, True | 0.001
+False, False, False | 0.999
+
+f_4(Alarm)=
+True | 1.0
+False | 1.0
+
+
+
+Earthquake is in factor f_1
+Earthquake is in factor f_2
+
+Multiply factors and sum out Earthquake
+Added new factor f_5([Burglary, Alarm]) 
+
+p(Burglary) = f_0(Burglary) f_4(Alarm) f_5(Burglary,Alarm) 
+
+The Factors
+f_0(Burglary)=
+True | 0.01
+False | 0.99
+
+f_4(Alarm)=
+True | 1.0
+False | 1.0
+
+f_5(Burglary,Alarm)=
+True, True | 0.9401999999999999
+True, False | 0.0598
+False, True | 0.00678
+False, False | 0.99322
+
+
+
+Alarm is in factor f_4
+Alarm is in factor f_5
+
+Multiply factors and sum out Alarm
+Added new factor f_6([Burglary]) 
+
+p(Burglary) = f_0(Burglary) f_6(Burglary) 
+
+The Factors
+f_0(Burglary)=
+True | 0.01
+False | 0.99
+
+f_6(Burglary)=
+True | 0.9999999999999999
+False | 1.0
+
+Step g) Normalize result: 
+	
+ After normalization: p(Burglary) = f_0(Burglary) f_6(Burglary) 
+
+The Factors
+f_0(Burglary)=
+True | 0.01
+False | 0.99
+
+f_6(Burglary)=
+True | 0.49999999999999994
+False | 0.5
+

@@ -82,7 +82,7 @@ public class Networkreader {
     /**
      * Searches for a row of probabilities in a string
      *
-     * @param a string s
+     * @param s
      * @return a ProbRow
      */
     public ProbRow searchForProbs(String s) {
@@ -113,7 +113,7 @@ public class Networkreader {
     /**
      * Searches for values in a string
      *
-     * @param a string s
+     * @param s
      * @return a list of values
      */
     public ArrayList<String> searchForValues(String s) {
@@ -295,6 +295,8 @@ public class Networkreader {
      * Checks whether a number and value represent a valid observed value or not
      * and if so, adds it to the observed list. If not, asks again for new
      * input.
+     * @param queriedVar
+     * @param value
      */
     public void changeVariableToObserved(int queriedVar, String value) {
         Variable ob;
@@ -321,8 +323,9 @@ public class Networkreader {
      * Print the network that was read-in (by printing the variables, parents
      * and probabilities).
      *
-     * @param The list of variables.
-     * @param The list of probabilities.
+     * @param Vs
+     * @param Ps
+     * @return 
      */
     public String printNetwork(ArrayList<Variable> Vs, ArrayList<ArrayList<ProbRow>> Ps) {
         String log = "";
@@ -363,8 +366,8 @@ public class Networkreader {
     /**
      * Prints the query and observed variables given in by the user.
      *
-     * @param The query variable(s).
-     * @param The observed variable(s).
+     * @param query
+     * @param Obs
      */
     public void printQueryAndObserved(Variable query, ArrayList<Variable> Obs) {
         System.out.println("\nThe queried variable(s) is/are: "); // Printing

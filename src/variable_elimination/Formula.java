@@ -13,7 +13,7 @@ import java.util.ArrayList;
  */
 public class Formula {
 
-    ArrayList<Variable> product_formula = new ArrayList();
+    ArrayList<Variable> formula = new ArrayList();
 
     ArrayList<Variable> Vs = new ArrayList();
     Variable Query;
@@ -99,7 +99,7 @@ public class Formula {
                 } else {
                     form += ("P(" + Vs.get(i).getName() + "|");
                 }
-                product_formula.add(Vs.get(i));
+                formula.add(Vs.get(i));
 
                 for (int j = 0; j < Vs.get(i).getParents().size(); j++) {
                     if (O.contains(Vs.get(i).getParents().get(j))) {
@@ -111,7 +111,7 @@ public class Formula {
                 form = form.substring(0, form.length() - 1);
                 form += ")";
             } else {
-                product_formula.add(Vs.get(i));
+                formula.add(Vs.get(i));
 
                 if (O.contains(Vs.get(i))) {
                     form += ("P(" + Vs.get(i).getName() + "=" + Vs.get(i).getValue() + ")");
@@ -142,8 +142,8 @@ public class Formula {
             }
 
             if (variable.getObserved()) {
-                //no need to add to factors
-                product_formula.set(product_formula.indexOf(variable), null);
+                observedVariableFactor(variable, table, factor_idx);
+                formula.set(formula.indexOf(variable), null);
             } else if (parent_obs) { //if one or more of parents is observed, reduce observed variable and create factor
                 reduceObs_createFactor(variable, table, factor_idx);
                 factor_idx++;
@@ -155,6 +155,39 @@ public class Formula {
         }
         fsize = Factors.size();
 
+    }
+
+    /**
+     * create factor for observed variable
+     * @param variable
+     * @param table
+     * @param factor_idx 
+     */
+    private void observedVariableFactor(Variable variable, ArrayList<ProbRow> table, int factor_idx) {
+        ArrayList<String> pr = new ArrayList();
+        pr.add("p");
+        ArrayList<ProbRow> new_prop = new ArrayList();
+        Variable fact = new Variable("f_" + factor_idx, pr);
+        ArrayList<Variable> parents = new ArrayList();
+        if(variable.hasParents())
+            parents.addAll(variable.getParents());
+        parents.add(variable);
+        String value = variable.getValue();
+        for (ProbRow tablerow : table) {
+            for (int p = 0; p < tablerow.getNode().getNumberOfValues(); p++) {
+                if (tablerow.getNode().getValues().get(p).equals(value)) {
+                    double[] probs = {tablerow.getProbs()[p]};
+                    String[] pv = new String[tablerow.getPVsAsArrayList().size() + 1];
+                    pv = tablerow.getPVsAsArrayList().toArray(pv);
+                    pv[tablerow.getPVsAsArrayList().size()] = tablerow.getNode().getValues().get(p);
+
+                    ProbRow new_p = new ProbRow(fact, probs, pv, parents);
+                    new_prop.add(new_p);
+                }
+            }
+        }
+        Factor factor = new Factor(fact, parents, new_prop);
+        Factors.add(factor);
     }
 
     /**
@@ -233,7 +266,7 @@ public class Formula {
                 for (int p = 0; p < tablerow.getNode().getNumberOfValues(); p++) {
                     double[] probs = {tablerow.getProbs()[p]};
                     ArrayList<String> tmp = tablerow.getPVsAsArrayList();
-                    for (int o_i = 0; o_i < obs_p.length; o_i++) {
+                    for (int o_i = obs_p.length-1; o_i > 0; o_i--) {
                         tmp.remove(obs_p[o_i]);
                     }
                     String[] pv = new String[tmp.size() + 1];
@@ -260,17 +293,17 @@ public class Formula {
      * @return elimination order
      */
     public ArrayList<Variable> EliminationOrder() {
-        for (Variable v : product_formula) {
+        for (Variable v : formula) {
             if (isLeaf(v) && !v.getName().equals(Query.getName())) {
                 Elimination.add(v);
             }
         }
-        for (Variable v : product_formula) {
+        for (Variable v : formula) {
             if (isRoot(v) && !v.getName().equals(Query.getName())) {
                 Elimination.add(v);
             }
         }
-        for (Variable v : product_formula) {
+        for (Variable v : formula) {
             if (!Elimination.contains(v) && v != null && !v.getName().equals(Query.getName())) {
                 Elimination.add(v);
             }
@@ -315,16 +348,15 @@ public class Formula {
     }
 
     /**
-     * eliminate the variable Z from the factors
+     * eliminate the variable Z from the factors // 1) multiply factors
+     * containing Z // 2) sum out Z to obtain new factor f_z // 3) remove
+     * multiplied factors from list and add f_z
      *
      * @param Z
      * @return log string
      */
     public String eliminate_Z(Variable Z) {
-        //  1) multiply factors containing Z
-        //  2) sum out Z to obtain new factor f_z
-        //  3) remove multiplied factors from list and add f_z
-        
+
         Factor f_Z = null;
         ArrayList<String> p = new ArrayList();
         p.add("p");
@@ -347,11 +379,26 @@ public class Formula {
         }
 
         f_Z = f_Z.sumOut(Z);
-        if(!f_Z.isEmpty())
+        if (!f_Z.isEmpty()) {
             Factors.add(f_Z);
+        }
         log += ("\nMultiply factors and sum out " + Z.getName() + "\nAdded new factor " + f_Z.getName() + "(" + f_Z.getVariables() + ") \n\n");
         log += factor_probs();
         return log;
+    }
+
+    public void cleanUpFactors() {
+        Factor finalFactor = null;
+        for (Factor factor : Factors) {
+            if (finalFactor == null) {
+                finalFactor = factor;
+            } else {
+                finalFactor = finalFactor.multiply(factor, Query);
+
+            }
+        }
+        Factors.removeAll(Factors);
+        Factors.add(finalFactor);
     }
 
     /**
@@ -377,7 +424,7 @@ public class Formula {
      * @return
      */
     public String normalize() {
-        double sum = 0;
+
         for (Factor factor : Factors) {
             factor.normalize();
         }

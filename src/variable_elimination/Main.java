@@ -12,7 +12,11 @@ import java.util.ArrayList;
 public class Main {
 	private final static String networkName = "earthquake.bif"; // The network to be read in (format from http://www.bnlearn.com/bnrepository/)
 
-	public static void main(String[] args) {
+    /**
+     *
+     * @param args
+     */
+    public static void main(String[] args) {
 		
 		// Read in the network
 		Networkreader reader = new Networkreader(networkName); 
@@ -70,7 +74,7 @@ public class Main {
                 }
                 System.out.println(log_f);
                 log.log_f(log_f);
-                
+                form.cleanUpFactors();
                 //g) normalize result
                 String log_g = form.normalize();
                 System.out.println(log_g);

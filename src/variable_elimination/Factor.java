@@ -8,32 +8,59 @@ package variable_elimination;
 import java.util.ArrayList;
 
 /**
- *
+ * Represent a factor and factor computations
  * @author Lisa Tostrams
  */
 public class Factor {
 
-    ArrayList<ProbRow> prob_table;
+    ArrayList<ProbRow> value_table;
     Variable factor;
     ArrayList<Variable> variables;
 
+    /**
+     * Constructor of the Factor, with the name factor, a list of variables the
+     * factor is on and the value table associated with the factor.
+     * @param factor
+     * @param variables
+     * @param table
+     */
     public Factor(Variable factor, ArrayList<Variable> variables, ArrayList<ProbRow> table) {
         this.factor = factor;
-        this.prob_table = table;
+        this.value_table = table;
         this.variables = variables;
     }
 
+    /**
+     * getter of the name
+     * @return name
+     */
     public String getName() {
         return factor.getName();
     }
 
+    /**
+     * setter of a new name f
+     * @param f
+     */
     public void setFactor(Variable f) {
-        factor = f; 
+        factor = f;
     }
+
+    /**
+     * getter of the list of variables of the factor
+     * @return variables
+     */
     public ArrayList<Variable> getVariables() {
         return variables;
     }
 
+    /**
+     * Function that multiplies this factor with other factor, with the common 
+     * variable commonVar. 
+     * @param other
+     * @param commonVar
+     * @return result from multiplication
+     */
     public Factor multiply(Factor other, Variable commonVar) {
         ArrayList<ProbRow> tmp = new ArrayList();
         ArrayList<Variable> parents = new ArrayList();
@@ -54,7 +81,7 @@ public class Factor {
 
                     String[] vv = new String[varvalues.size()];
                     vv = varvalues.toArray(vv);
-                    double[] pr = {this.getProb(this_row) * other.getProb(other_row)}; //new probablilty
+                    double[] pr = {this.getVal(this_row) * other.getVal(other_row)}; //new probablilty
                     ProbRow new_prob = new ProbRow(factor, pr, vv, parents);
                     tmp.add(new_prob);
                 }
@@ -66,6 +93,14 @@ public class Factor {
         return factor_Z;
     }
 
+    /**
+     * Check whether it is possible to sum out the variable at index Z_idx in the list
+     * of variables from the two rows at index row1 and row2 in the list of probability rows.
+     * @param row1
+     * @param row2
+     * @param Z_idx
+     * @return true if the variable at Z_idx can be summed out.
+     */
     public boolean possibleToSumOut(int row1, int row2, int Z_idx) {
         if (getVarValues(row1).get(Z_idx).equals(getVarValues(row2).get(Z_idx))) {
             return false;
@@ -79,6 +114,11 @@ public class Factor {
         return true;
     }
 
+    /**
+     * Sum out variable Z from the factor. 
+     * @param Z
+     * @return result from summing out Z
+     */
     public Factor sumOut(Variable Z) {
         int f_z_idx = getVariables().indexOf(Z);
         ArrayList<ProbRow> tmp = new ArrayList();
@@ -86,15 +126,15 @@ public class Factor {
         parents.addAll(getVariables());
         parents.remove(Z);
 
-        for (int row1 = 0; row1 < prob_table.size(); row1++) {
-            for (int row2 = 0; row2 < prob_table.size(); row2++) { //sum out Z to obtain new factor
+        for (int row1 = 0; row1 < value_table.size(); row1++) {
+            for (int row2 = 0; row2 < value_table.size(); row2++) { //sum out Z to obtain new factor
                 if (possibleToSumOut(row1, row2, f_z_idx)) { //sum rows where possible
 
                     ArrayList<String> varvalues = new ArrayList();
                     varvalues.addAll(getVarValues(row1));
                     varvalues.remove(f_z_idx);
 
-                    double[] pr = {getProb(row1) + getProb(row2)};
+                    double[] pr = {getVal(row1) + getVal(row2)};
                     String[] pv = new String[varvalues.size()];
                     pv = varvalues.toArray(pv);
                     ProbRow summedout = new ProbRow(factor, pr, pv, parents);
@@ -116,44 +156,74 @@ public class Factor {
         return factor_Z;
     }
 
+    /**
+     * Normalize current factor
+     */
     public void normalize() {
         double sum = 0;
-        for (int i = 0; i < prob_table.size(); i++) {
-            sum += getProb(i);
+        for (int i = 0; i < value_table.size(); i++) {
+            sum += getVal(i);
         }
-        for (int i = 0; i < prob_table.size(); i++) {
-            setProb(i, getProb(i) / sum);
+        for (int i = 0; i < value_table.size(); i++) {
+            setVal(i, getVal(i) / sum);
         }
     }
 
-    public double getProb(int i) {
-        if (prob_table.size() > i) {
-            return prob_table.get(i).getProbs()[0];
+    /**
+     * Getter of the value at row i of the value table
+     * @param i
+     * @return
+     */
+    public double getVal(int i) {
+        if (value_table.size() > i) {
+            return value_table.get(i).getProbs()[0];
         }
         return -1;
     }
 
-    private void setProb(int i, double p) {
-        if (prob_table.size() > i) {
-            prob_table.get(i).getProbs()[0] = p;
+    /**
+     * Setter of the value at row i of the value table to value p
+     * @param i
+     * @param p 
+     */
+    private void setVal(int i, double p) {
+        if (value_table.size() > i) {
+            value_table.get(i).getProbs()[0] = p;
         }
     }
 
+    /**
+     * getter of the variable values at row i of the valye table
+     * @param i
+     * @return
+     */
     public ArrayList<String> getVarValues(int i) {
-        if (prob_table.size() > i) {
-            return prob_table.get(i).getPVsAsArrayList();
+        if (value_table.size() > i) {
+            return value_table.get(i).getPVsAsArrayList();
         }
         return null;
     }
 
+    /**
+     * getter of the complete table
+     * @return table
+     */
     public ArrayList<ProbRow> getTable() {
-        return prob_table;
+        return value_table;
     }
-    
+
+    /**
+     * checks wheter any variables are associated with this factor
+     * @return true when no variables are associated with this factor
+     */
     public boolean isEmpty() {
         return variables.isEmpty();
     }
 
+    /**
+     * returns a string representation of the Factor
+     * @return string representation
+     */
     @Override
     public String toString() {
         String str = factor.getName();
@@ -163,7 +233,7 @@ public class Factor {
         }
         str = str.substring(0, str.length() - 1);
         str += ")=\n";
-        for (ProbRow pr : prob_table) {
+        for (ProbRow pr : value_table) {
             str += (pr.toString() + "\n");
         }
         return str;

@@ -27,6 +27,11 @@ public class Log {
 
     BufferedWriter writer = null;
 
+    /**
+     *
+     * @param networkname
+     * @param network
+     */
     public Log(String networkname, String network) {
         this.networkname = networkname;
 
@@ -80,6 +85,8 @@ public class Log {
 
     /**
      * schrijf product formule weg schrijf gereduceerde formule weg
+     * @param red_form
+     * @param prod_form
      */
     public void log_c(String red_form, String prod_form) {
         try {
@@ -92,6 +99,7 @@ public class Log {
 
     /**
      * schrijf geidentificeerde factoren weg
+     * @param factor_probs
      */
     public void log_d(String factor_probs) {
         try {
@@ -130,6 +138,7 @@ public class Log {
 
     /**
      * Schrijf genormaliseerde verdeling weg
+     * @param log
      */
     public void log_g(String log) {
         try {
